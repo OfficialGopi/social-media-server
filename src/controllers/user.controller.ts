@@ -1,0 +1,131 @@
+import {
+  badRequestErrorClient,
+  noAccessErrorClient,
+  notFoundErrorClient,
+  okSuccess,
+  resourceCreatedSuccess,
+} from "../constants/statusCode.constant.js";
+import { UserModel } from "../models/user.model.js";
+import { ApiError } from "../utils/api.error.js";
+import { ApiResponse } from "../utils/api.response.js";
+import { TryCatch } from "../utils/custom.try-catch.block.js";
+
+import {
+  typeLoginUserRequestBody,
+  typeSignupUserRequestBody,
+} from "../types/userControllers.types.js";
+import { accessTokenAndRefreshTokenGenerateAndSave } from "../helper/accessTokenAndRefreshTokenGenerateAndSave.js";
+
+const signupUser = TryCatch(async (req, res, _) => {
+  const {
+    username,
+    gmail,
+    password,
+    firstName,
+    middleName,
+    lastName,
+    dateOfBirth,
+    bio,
+    gender,
+  }: typeSignupUserRequestBody = req.body;
+
+  if (
+    !(
+      username &&
+      gmail &&
+      password &&
+      firstName &&
+      dateOfBirth &&
+      bio &&
+      gender
+    )
+  ) {
+    throw new ApiError(badRequestErrorClient, "All * fields are required");
+  }
+
+  const isUserExists = await UserModel.findOne({ username });
+
+  if (isUserExists) {
+    throw new ApiError(badRequestErrorClient, "Username already taken");
+  }
+
+  const newUser = await UserModel.create({
+    username,
+    password,
+    gmail,
+    firstName,
+    middleName,
+    lastName,
+    dateOfBirth: new Date(dateOfBirth),
+    bio,
+    gender,
+  });
+
+  res
+    .status(resourceCreatedSuccess)
+    .json(new ApiResponse(resourceCreatedSuccess, newUser));
+});
+
+const loginUser = TryCatch(async (req, res, _) => {
+  const { userAccessDetails, password }: typeLoginUserRequestBody = req.body;
+
+  if (!userAccessDetails || !password) {
+    throw new ApiError(badRequestErrorClient, "All fields required");
+  }
+
+  const user = await UserModel.findOne({
+    $or: [
+      {
+        username: userAccessDetails,
+      },
+      {
+        gmail: userAccessDetails,
+      },
+    ],
+  });
+
+  if (!user) {
+    throw new ApiError(notFoundErrorClient, "Incorrect User Details");
+  }
+
+  const isPasswordCorrect = await user.isPasswordCorrect(password);
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(noAccessErrorClient, "Incorrect User Details");
+  }
+
+  const tokens = await accessTokenAndRefreshTokenGenerateAndSave(user.id);
+
+  if (!tokens.success || !tokens.data) {
+    throw new ApiError(tokens.status, tokens.message);
+  }
+
+  res.status(okSuccess).json(
+    new ApiResponse(okSuccess, {
+      accessToken: tokens.data.accessToken,
+      refreshToken: tokens.data.refreshToken,
+    })
+  );
+});
+
+const logoutUser = TryCatch(async (req, res, _) => {
+  if (!req.user._id) {
+    throw new ApiError(badRequestErrorClient, "User Id not found");
+  }
+
+  const user = await UserModel.findByIdAndUpdate(req.user._id, {
+    $unset: {
+      refreshToken: 1,
+    },
+  });
+
+  if (!user) {
+    throw new ApiError(badRequestErrorClient, "User not found");
+  }
+
+  res
+    .status(okSuccess)
+    .json(new ApiResponse(okSuccess, {}, "Logout Successfully"));
+});
+
+export { signupUser, loginUser, logoutUser };
