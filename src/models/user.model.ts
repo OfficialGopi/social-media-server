@@ -24,6 +24,10 @@ const userSchema = new Schema<IUser>(
       required: true,
       unique: true,
       lowercase: true,
+      validate: {
+        validator: (gmail: string) => gmail.endsWith("@gmail.com"),
+        message: "It is not gmail",
+      },
     },
     password: {
       type: String,
