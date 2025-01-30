@@ -63,8 +63,15 @@ const createGroupChat = TryCatch(async (req, res) => {
     creator,
     members,
     groupName,
-    groupDescription,
+    groupDescription = "",
   }: typeCreateGroupChatRequestBody = req.body;
+
+  if (!creator || !members || !groupName) {
+    throw new ApiError(
+      badRequestErrorClient,
+      "Creator, members and groupName are required"
+    );
+  }
 
   const users = await UserModel.find({
     _id: { $in: [...members, creator] },
