@@ -6,7 +6,7 @@ const port: number = Number(process.env.PORT) || 3000;
 const mongoUri: string = process.env.MONGO_URI || "mongodb://localhost:27017/";
 const mongoDbName: string = process.env.MONGO_DB_NAME || "social-media-app";
 
-const passwordSaltRound: number = Number(process.env.PASSWORD_SALT_ROUND) || 20;
+const passwordSaltRound: number = Number(process.env.PASSWORD_SALT_ROUND) || 10;
 
 const jwtSecret: string = process.env.JWT_SECRET || "";
 
