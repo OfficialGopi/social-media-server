@@ -4,6 +4,7 @@ import {
   notFoundErrorClient,
   okSuccess,
   resourceCreatedSuccess,
+  unauthorizedErrorClient,
 } from "../constants/statusCode.constant.js";
 import { UserModel } from "../models/user.model.js";
 import { ApiError } from "../utils/api.error.js";
@@ -15,6 +16,8 @@ import {
   typeSignupUserRequestBody,
 } from "../types/userControllers.types.js";
 import { accessTokenAndRefreshTokenGenerateAndSave } from "../helper/accessTokenAndRefreshTokenGenerateAndSave.js";
+import { refreshTokenSecret } from "../constants/env.constants.js";
+import jwt from "jsonwebtoken";
 
 //signup
 const signupUser = TryCatch(async (req, res, _) => {
@@ -144,4 +147,38 @@ const logoutUser = TryCatch(async (req, res, _) => {
     .json(new ApiResponse(okSuccess, {}, "Logout Successfully"));
 });
 
-export { signupUser, loginUser, logoutUser };
+//refresh accessToken
+const refreshAccessToken = TryCatch(async (req, res, _) => {
+  const refreshToken = req.header("refresh-token")?.replace("Bearer ", "");
+
+  if (!refreshToken) {
+    throw new ApiError(unauthorizedErrorClient, "Token required");
+  }
+
+  const decodedToken = jwt.verify(
+    refreshToken,
+    refreshTokenSecret
+  ) as unknown as {
+    _id: string;
+  };
+
+  if (!decodedToken || !decodedToken._id) {
+    throw new ApiError(badRequestErrorClient, "Invalid Token");
+  }
+
+  const user = await UserModel.findById(decodedToken._id);
+
+  if (!user) {
+    throw new ApiError(notFoundErrorClient, "Invalid Token");
+  }
+
+  if (user.refreshToken !== refreshToken) {
+    throw new ApiError(badRequestErrorClient, "Used Token");
+  }
+
+  const newTokens = await accessTokenAndRefreshTokenGenerateAndSave(user.id);
+
+  res.status(okSuccess).json(new ApiResponse(okSuccess, newTokens));
+});
+
+export { signupUser, loginUser, logoutUser, refreshAccessToken };
