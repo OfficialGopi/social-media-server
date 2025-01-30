@@ -8,10 +8,10 @@ const chatMessagesSchema = new Schema<IChatMessages>(
       required: true,
       ref: "chats",
     },
-    member: {
+    sender: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: "chatmembers",
+      ref: "users",
     },
     message: {
       type: String,

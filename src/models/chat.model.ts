@@ -17,6 +17,13 @@ const chatSchema = new Schema<IChat>(
       type: Schema.Types.ObjectId,
       ref: "user",
     },
+    members: {
+      type: [Schema.Types.ObjectId],
+      ref: "users",
+    },
+    avatar: {
+      type: String,
+    },
   },
   {
     timestamps: true,

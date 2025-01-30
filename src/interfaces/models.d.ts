@@ -92,15 +92,8 @@ interface IChat extends Document {
   groupName: string;
   groupDescription: string;
   groupAdmin: Types.ObjectId;
-
-  createdOn: Date;
-  updatedOn: Date;
-}
-
-interface IChatMembers extends Document {
-  _id: Types.ObjectId;
-  user: Types.ObjectId;
-  chat: Types.ObjectId;
+  members: Types.ObjectId[];
+  avatar: string;
 
   createdOn: Date;
   updatedOn: Date;
@@ -109,7 +102,7 @@ interface IChatMembers extends Document {
 interface IChatMessages extends Document {
   _id: Types.ObjectId;
   chat: Types.ObjectId;
-  member: Types.ObjectId;
+  sender: Types.ObjectId;
   message: string;
   attachments: string[];
   deletedForEveryone: boolean;
