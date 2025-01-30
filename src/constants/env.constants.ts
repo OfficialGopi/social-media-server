@@ -17,7 +17,7 @@ const cloudinaryName: string = process.env.CLOUDINARY_NAME || "";
 const crossOrigin: string = process.env.CROSS_ORIGIN || "http://localhost:5173";
 
 const accessTokenSecret: string = process.env.ACCESS_TOKEN_SECRET || "";
-const accessTokenExpiry: string = process.env.ACCESS_TOKEN_EXPIRY || "28d";
+const accessTokenExpiry: string = process.env.ACCESS_TOKEN_EXPIRY || "1s";
 const refreshTokenSecret: string = process.env.REFRESH_TOKEN_SECRET || "";
 const refreshTokenExpiry: string = process.env.REFRESH_TOKEN_EXPIRY || "365d";
 

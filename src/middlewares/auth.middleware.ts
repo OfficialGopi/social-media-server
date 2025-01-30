@@ -10,7 +10,7 @@ import { TryCatch } from "../utils/custom.try-catch.block.js";
 import jwt from "jsonwebtoken";
 
 const verifyJWT = TryCatch(async (req, _, next) => {
-  const accessToken = req.header("Authorization")?.replace("Bearer ", "");
+  const accessToken = req.header("access-token")?.replace("Bearer ", "");
 
   if (!accessToken) {
     throw new ApiError(unauthorizedErrorClient, "Token required");
