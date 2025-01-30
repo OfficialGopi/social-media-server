@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import {
   accessTokenExpiry,
   accessTokenSecret,
-  passwordSalt,
+  passwordSaltRound,
   refreshTokenExpiry,
   refreshTokenSecret,
 } from "../constants/env.constants.js";
@@ -72,7 +72,7 @@ userSchema.pre("save", async function (next) {
   if (!this.isNew && !this.isModified("password")) {
     next();
   } else {
-    this.password = await bcrypt.hash(this.password, passwordSalt);
+    this.password = await bcrypt.hash(this.password, passwordSaltRound);
   }
 });
 

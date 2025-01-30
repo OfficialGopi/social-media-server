@@ -16,6 +16,7 @@ import {
 } from "../types/userControllers.types.js";
 import { accessTokenAndRefreshTokenGenerateAndSave } from "../helper/accessTokenAndRefreshTokenGenerateAndSave.js";
 
+//signup
 const signupUser = TryCatch(async (req, res, _) => {
   const {
     username,
@@ -29,17 +30,7 @@ const signupUser = TryCatch(async (req, res, _) => {
     gender,
   }: typeSignupUserRequestBody = req.body;
 
-  if (
-    !(
-      username &&
-      gmail &&
-      password &&
-      firstName &&
-      dateOfBirth &&
-      bio &&
-      gender
-    )
-  ) {
+  if (!(username && gmail && password && firstName && dateOfBirth && gender)) {
     throw new ApiError(badRequestErrorClient, "All * fields are required");
   }
 
@@ -61,11 +52,21 @@ const signupUser = TryCatch(async (req, res, _) => {
     gender,
   });
 
-  res
-    .status(resourceCreatedSuccess)
-    .json(new ApiResponse(resourceCreatedSuccess, newUser));
+  res.status(resourceCreatedSuccess).json(
+    new ApiResponse(resourceCreatedSuccess, {
+      username: newUser.username,
+      gmail: newUser.gmail,
+      firstName: newUser.firstName,
+      middleName: newUser.middleName,
+      lastName: newUser.lastName,
+      dateOfBirth: newUser.dateOfBirth,
+      bio: newUser.bio,
+      gender: newUser.gender,
+    })
+  );
 });
 
+//login
 const loginUser = TryCatch(async (req, res, _) => {
   const { userAccessDetails, password }: typeLoginUserRequestBody = req.body;
 
@@ -100,14 +101,29 @@ const loginUser = TryCatch(async (req, res, _) => {
     throw new ApiError(tokens.status, tokens.message);
   }
 
+  const userInfo = await UserModel.findById(user._id).select(
+    "-password -refreshToken"
+  );
+
+  if (!userInfo) {
+    throw new ApiError(
+      badRequestErrorClient,
+      "User not found after generating tokens"
+    );
+  }
+
   res.status(okSuccess).json(
     new ApiResponse(okSuccess, {
-      accessToken: tokens.data.accessToken,
-      refreshToken: tokens.data.refreshToken,
+      tokens: {
+        accessToken: tokens.data.accessToken,
+        refreshToken: tokens.data.refreshToken,
+      },
+      info: userInfo,
     })
   );
 });
 
+//logout
 const logoutUser = TryCatch(async (req, res, _) => {
   if (!req.user._id) {
     throw new ApiError(badRequestErrorClient, "User Id not found");

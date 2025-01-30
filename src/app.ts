@@ -19,9 +19,10 @@ app.use(
 
 app.use(express.json());
 
-import { v1 } from "./versions/v1.routes.js";
+import { v1 } from "./versions/v1.version.js";
 
 app.use("/api/v1", v1);
+
 app.use(errorMiddleware);
 
 export { httpServer };

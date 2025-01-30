@@ -6,7 +6,7 @@ const port: number = Number(process.env.PORT) || 3000;
 const mongoUri: string = process.env.MONGO_URI || "mongodb://localhost:27017/";
 const mongoDbName: string = process.env.MONGO_DB_NAME || "social-media-app";
 
-const passwordSalt: string = process.env.PASSWORD_SALT || "Gopi2004";
+const passwordSaltRound: number = Number(process.env.PASSWORD_SALT_ROUND) || 20;
 
 const jwtSecret: string = process.env.JWT_SECRET || "";
 
@@ -30,7 +30,7 @@ export {
   cloudinaryKey,
   cloudinarySecret,
   crossOrigin,
-  passwordSalt,
+  passwordSaltRound,
   accessTokenSecret,
   refreshTokenSecret,
   accessTokenExpiry,
