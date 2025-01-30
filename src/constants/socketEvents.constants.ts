@@ -1,15 +1,15 @@
-const alertEvent: string = "ALERT";
-const refetchChatsEvent: string = "REFETCH_CHATS";
-const newAttachmentEvent: string = "NEW_ATTACHMENT";
-const newMessageAlertEvent: string = "NEW_MESSAGE_ALERT";
-const newRequestEvent: string = "NEW_REQUEST";
-const newMessageEvent: string = "NEW_MESSAGE";
+const EVENT_ALERT: string = "ALERT";
+const EVENT_REFETCH_CHATS: string = "REFETCH_CHATS";
+const EVENT_NEW_ATTACHMENT: string = "NEW_ATTACHMENT";
+const EVENT_NEW_MESSAGE_ALERT: string = "NEW_MESSAGE_ALERT";
+const EVENT_NEW_REQUEST: string = "NEW_REQUEST";
+const EVENT_NEW_MESSAGE: string = "NEW_MESSAGE";
 
 export {
-  alertEvent,
-  refetchChatsEvent,
-  newAttachmentEvent,
-  newMessageAlertEvent,
-  newMessageEvent,
-  newRequestEvent,
+  EVENT_ALERT,
+  EVENT_REFETCH_CHATS,
+  EVENT_NEW_ATTACHMENT,
+  EVENT_NEW_MESSAGE_ALERT,
+  EVENT_NEW_REQUEST,
+  EVENT_NEW_MESSAGE,
 };
