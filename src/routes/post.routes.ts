@@ -7,6 +7,9 @@ import {
   editPost,
   sharePost,
   toogleLikePost,
+  deleteCommentOnPost,
+  replyOnCommentOnPost,
+  deleteReplyOnCommentOnPost,
 } from "../controllers/post.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
@@ -20,9 +23,15 @@ post
 
 post.route("/like/:post").patch(verifyJWT, toogleLikePost);
 
-post.route("/comment/:post").post(verifyJWT, commentOnPost);
-post.route("/reply/:post/:commentId").post(verifyJWT, commentOnPost);
+post
+  .route("/comment/:post")
+  .post(verifyJWT, commentOnPost)
+  .delete(verifyJWT, deleteCommentOnPost);
 
+post
+  .route("/reply/:post/:commentId")
+  .post(verifyJWT, replyOnCommentOnPost)
+  .delete(verifyJWT, deleteReplyOnCommentOnPost);
 post.route("/share/:post").patch(verifyJWT, sharePost);
 
 export { post };

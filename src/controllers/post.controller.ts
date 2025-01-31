@@ -120,6 +120,22 @@ const deletePost = TryCatch(async (req, res, _) => {
 
   await postFound.deleteOne();
 
+  const comments = await CommentsOnPostsModel.find({
+    post: postFound._id,
+  });
+
+  for (const comment of comments) {
+    await comment.deleteOne();
+  }
+
+  const likes = await LikesOnPostsModel.find({
+    post: postFound._id,
+  });
+
+  for (const like of likes) {
+    await like.deleteOne();
+  }
+
   res
     .status(resourceCreatedSuccess)
     .json(
@@ -243,7 +259,7 @@ const commentOnPost = TryCatch(async (req, res, _) => {
     );
 });
 
-const replyOnComment = TryCatch(async (req, res, _) => {
+const replyOnCommentOnPost = TryCatch(async (req, res, _) => {
   const user = req.user as unknown as IUser;
 
   if (!user) {
@@ -303,6 +319,119 @@ const replyOnComment = TryCatch(async (req, res, _) => {
     );
 });
 
+const deleteCommentOnPost = TryCatch(async (req, res, _) => {
+  const user = req.user as unknown as IUser;
+
+  if (!user) {
+    throw new ApiError(unauthorizedErrorClient, "User not found");
+  }
+
+  const {
+    post,
+    commentId,
+  }: {
+    post?: string;
+    commentId?: string;
+  } = req.params;
+
+  if (!post || !commentId) {
+    throw new ApiError(unauthorizedErrorClient, "Post or comment not found");
+  }
+
+  const postFound = await PostsModel.findById(post);
+
+  if (!postFound) {
+    throw new ApiError(unauthorizedErrorClient, "Post not found");
+  }
+
+  const commentFound = await CommentsOnPostsModel.findById(commentId);
+
+  if (!commentFound) {
+    throw new ApiError(unauthorizedErrorClient, "Comment not found");
+  }
+
+  if (
+    user._id.toString() !== commentFound.user.toString() ||
+    user._id.toString() !== postFound.user.toString()
+  ) {
+    throw new ApiError(
+      unauthorizedErrorClient,
+      "You are not allowed to delete this comment"
+    );
+  }
+
+  await commentFound.deleteOne();
+
+  const comments = await CommentsOnPostsModel.find({
+    post: postFound._id,
+    replyOnCommentId: commentFound._id,
+  });
+
+  for (const comment of comments) {
+    await comment.deleteOne();
+  }
+
+  res
+    .status(resourceCreatedSuccess)
+    .json(
+      new ApiResponse(
+        resourceCreatedSuccess,
+        {},
+        "Comment deleted successfully"
+      )
+    );
+});
+
+const deleteReplyOnCommentOnPost = TryCatch(async (req, res, _) => {
+  const user = req.user as unknown as IUser;
+
+  if (!user) {
+    throw new ApiError(unauthorizedErrorClient, "User not found");
+  }
+
+  const {
+    post,
+    commentId,
+  }: {
+    post?: string;
+    commentId?: string;
+  } = req.params;
+
+  if (!post || !commentId) {
+    throw new ApiError(unauthorizedErrorClient, "Post or comment not found");
+  }
+
+  const postFound = await PostsModel.findById(post);
+
+  if (!postFound) {
+    throw new ApiError(unauthorizedErrorClient, "Post not found");
+  }
+
+  const commentFound = await CommentsOnPostsModel.findById(commentId);
+
+  if (!commentFound) {
+    throw new ApiError(unauthorizedErrorClient, "Comment not found");
+  }
+
+  if (
+    user._id.toString() !== commentFound.user.toString() ||
+    user._id.toString() !== postFound.user.toString()
+  ) {
+    throw new ApiError(
+      unauthorizedErrorClient,
+      "You are not allowed to delete this reply"
+    );
+  }
+
+  await commentFound.deleteOne();
+
+  res
+    .status(resourceCreatedSuccess)
+    .json(
+      new ApiResponse(resourceCreatedSuccess, {}, "Reply deleted successfully")
+    );
+});
+
 export {
   createPost,
   deletePost,
@@ -310,5 +439,7 @@ export {
   toogleLikePost,
   sharePost,
   commentOnPost,
-  replyOnComment,
+  replyOnCommentOnPost,
+  deleteCommentOnPost,
+  deleteReplyOnCommentOnPost,
 };
