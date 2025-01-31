@@ -32,6 +32,7 @@ post
   .route("/reply/:post/:commentId")
   .post(verifyJWT, replyOnCommentOnPost)
   .delete(verifyJWT, deleteReplyOnCommentOnPost);
+
 post.route("/share/:post").patch(verifyJWT, sharePost);
 
 export { post };
