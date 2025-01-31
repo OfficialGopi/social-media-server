@@ -14,7 +14,7 @@ const postsSchema = new Schema<IPosts>(
     },
     caption: {
       type: String,
-      required: true,
+      default: "",
     },
     isReel: {
       type: Boolean,

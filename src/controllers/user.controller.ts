@@ -241,6 +241,7 @@ const editUser = TryCatch(async (req, res, _) => {
     dateOfBirth,
     bio,
     gender,
+    isPrivate,
   }: typeEditUserRequestBody = req.body;
 
   if (username) {
@@ -277,6 +278,11 @@ const editUser = TryCatch(async (req, res, _) => {
     user.gender = gender;
   }
 
+  if (isPrivate !== undefined) {
+    if (user.isPrivate !== isPrivate) {
+      user.isPrivate = isPrivate;
+    }
+  }
   const updatedUser = await user.save();
 
   const tokens = await accessTokenAndRefreshTokenGenerateAndSave(

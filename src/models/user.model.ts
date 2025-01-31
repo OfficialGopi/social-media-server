@@ -62,6 +62,10 @@ const userSchema = new Schema<IUser>(
       type: [String],
       default: [],
     },
+    isPrivate: {
+      type: Boolean,
+      default: false,
+    },
 
     refreshToken: {
       type: String,

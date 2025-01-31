@@ -12,6 +12,7 @@ interface IUser extends Document {
   bio: string;
   gender: "MALE" | "FEMALE" | "OTHERS";
   websites: string[];
+  isPrivate: boolean;
 
   refreshToken: String;
 
@@ -28,15 +29,6 @@ interface IPreviousCredentialsOfUsers extends Document {
   user: Types.ObjectId;
   previousThreeUsernames: [string, string, string];
   previousThreePasswords: [string, string, string];
-
-  createdOn: Date;
-  updatedOn: Date;
-}
-
-interface IAccountDetails extends Document {
-  _id: Types.ObjectId;
-  user: Types.ObjectId;
-  private: boolean;
 
   createdOn: Date;
   updatedOn: Date;

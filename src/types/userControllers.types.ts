@@ -23,6 +23,7 @@ interface typeEditUserRequestBody {
   dateOfBirth?: Date;
   bio?: string;
   gender?: "MALE" | "FEMALE" | "OTHERS";
+  isPrivate?: boolean;
 }
 
 export {
