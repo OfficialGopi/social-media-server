@@ -18,6 +18,7 @@ import {
 import { accessTokenAndRefreshTokenGenerateAndSave } from "../helper/accessTokenAndRefreshTokenGenerateAndSave.js";
 import { refreshTokenSecret } from "../constants/env.constants.js";
 import jwt from "jsonwebtoken";
+import { IUser } from "../interfaces/models.js";
 
 //signup
 const signupUser = TryCatch(async (req, res, _) => {
@@ -181,4 +182,42 @@ const refreshAccessToken = TryCatch(async (req, res, _) => {
   res.status(okSuccess).json(new ApiResponse(okSuccess, newTokens));
 });
 
-export { signupUser, loginUser, logoutUser, refreshAccessToken };
+//autologin
+
+const autoLogin = TryCatch(async (req, res, _) => {
+  const user = req.user as unknown as IUser;
+
+  if (!user) {
+    throw new ApiError(unauthorizedErrorClient, "User not found");
+  }
+
+  const userInfo = await UserModel.findById(user._id).select("-password");
+
+  if (!userInfo) {
+    throw new ApiError(unauthorizedErrorClient, "User not found");
+  }
+
+  const newTokens = await accessTokenAndRefreshTokenGenerateAndSave(
+    userInfo.id
+  );
+
+  if (!newTokens.success || !newTokens.data) {
+    throw new ApiError(newTokens.status, newTokens.message);
+  }
+
+  const userData = await UserModel.findById(user._id).select(
+    "-password -refreshToken"
+  );
+
+  res.status(okSuccess).json(
+    new ApiResponse(okSuccess, {
+      tokens: {
+        accessToken: newTokens.data.accessToken,
+        refreshToken: newTokens.data.refreshToken,
+      },
+      info: userData,
+    })
+  );
+});
+
+export { signupUser, loginUser, logoutUser, refreshAccessToken, autoLogin };
