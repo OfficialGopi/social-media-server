@@ -14,6 +14,7 @@ import { TryCatch } from "../utils/custom.try-catch.block.js";
 import {
   typeLoginUserRequestBody,
   typeSignupUserRequestBody,
+  typeEditUserRequestBody,
 } from "../types/userControllers.types.js";
 import { accessTokenAndRefreshTokenGenerateAndSave } from "../helper/accessTokenAndRefreshTokenGenerateAndSave.js";
 import { refreshTokenSecret } from "../constants/env.constants.js";
@@ -183,7 +184,6 @@ const refreshAccessToken = TryCatch(async (req, res, _) => {
 });
 
 //autologin
-
 const autoLogin = TryCatch(async (req, res, _) => {
   const user = req.user as unknown as IUser;
 
@@ -220,4 +220,100 @@ const autoLogin = TryCatch(async (req, res, _) => {
   );
 });
 
-export { signupUser, loginUser, logoutUser, refreshAccessToken, autoLogin };
+const editUser = TryCatch(async (req, res, _) => {
+  const reqUser = req.user as unknown as IUser;
+
+  if (!reqUser) {
+    throw new ApiError(unauthorizedErrorClient, "User not found");
+  }
+
+  const user = await UserModel.findById(reqUser._id);
+
+  if (!user) {
+    throw new ApiError(notFoundErrorClient, "User not found");
+  }
+
+  const {
+    username,
+    firstName,
+    middleName,
+    lastName,
+    dateOfBirth,
+    bio,
+    gender,
+  }: typeEditUserRequestBody = req.body;
+
+  if (username) {
+    const isUsernameExists = await UserModel.findOne({ username });
+
+    if (isUsernameExists) {
+      throw new ApiError(badRequestErrorClient, "Username already taken");
+    } else {
+      user.username = username;
+    }
+  }
+
+  if (firstName) {
+    user.firstName = firstName;
+  }
+
+  if (middleName) {
+    user.middleName = middleName;
+  }
+
+  if (lastName) {
+    user.lastName = lastName;
+  }
+
+  if (dateOfBirth) {
+    user.dateOfBirth = new Date(dateOfBirth);
+  }
+
+  if (bio) {
+    user.bio = bio;
+  }
+
+  if (gender) {
+    user.gender = gender;
+  }
+
+  const updatedUser = await user.save();
+
+  const tokens = await accessTokenAndRefreshTokenGenerateAndSave(
+    updatedUser.id
+  );
+
+  if (!tokens.success || !tokens.data) {
+    throw new ApiError(tokens.status, tokens.message);
+  }
+
+  const userInfo = await UserModel.findById(updatedUser._id).select(
+    "-password -refreshToken"
+  );
+
+  if (!userInfo) {
+    throw new ApiError(
+      badRequestErrorClient,
+      "User not found after generating tokens"
+    );
+  }
+
+  res.status(okSuccess).json(
+    new ApiResponse(okSuccess, {
+      tokens: {
+        accessToken: tokens.data.accessToken,
+        refreshToken: tokens.data.refreshToken,
+      },
+      info: userInfo,
+    })
+  );
+});
+
+export {
+  signupUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  autoLogin,
+  editUser,
+};

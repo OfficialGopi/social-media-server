@@ -15,4 +15,18 @@ interface typeLoginUserRequestBody {
   password: string;
 }
 
-export { typeLoginUserRequestBody, typeSignupUserRequestBody };
+interface typeEditUserRequestBody {
+  username?: string;
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  dateOfBirth?: Date;
+  bio?: string;
+  gender?: "MALE" | "FEMALE" | "OTHERS";
+}
+
+export {
+  typeLoginUserRequestBody,
+  typeSignupUserRequestBody,
+  typeEditUserRequestBody,
+};
