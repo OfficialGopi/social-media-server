@@ -33,6 +33,12 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// import {
+//   badRequestErrorClient,
+//   okSuccess,
+// } from "./constants/statusCode.constant.js";
+// import { ApiResponse } from "./utils/api.response.js";
+
 // app.use(passport.initialize());
 // app.use(passport.session());
 
@@ -94,11 +100,6 @@ app.use(express.urlencoded({ extended: true }));
 // });
 
 import { v1 } from "./versions/v1.version.js";
-import {
-  badRequestErrorClient,
-  okSuccess,
-} from "./constants/statusCode.constant.js";
-import { ApiResponse } from "./utils/api.response.js";
 
 app.use("/api/v1", v1);
 

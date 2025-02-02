@@ -67,6 +67,15 @@ interface ICommentsOnPosts extends Document {
   updatedOn: Date;
 }
 
+interface IFollowers extends Document {
+  _id: Types.ObjectId;
+  follower: Types.ObjectId;
+  following: Types.ObjectId;
+
+  createdOn: Date;
+  updatedOn: Date;
+}
+
 interface ISearchHistory extends Document {
   _id: Types.ObjectId;
   user: Types.ObjectId;
@@ -130,6 +139,7 @@ export {
   IPosts,
   ILikesOnPosts,
   ICommentsOnPosts,
+  IFollowers,
   ISearchHistory,
   IChat,
   IChatMembers,
