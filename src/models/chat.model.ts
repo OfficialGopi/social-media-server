@@ -15,7 +15,7 @@ const chatSchema = new Schema<IChat>(
     },
     groupAdmin: {
       type: Schema.Types.ObjectId,
-      ref: "user",
+      ref: "users",
     },
     members: {
       type: [Schema.Types.ObjectId],
