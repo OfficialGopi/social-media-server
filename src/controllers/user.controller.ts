@@ -130,17 +130,18 @@ const loginUser = TryCatch(async (req, res, _) => {
 
 //logout
 const logoutUser = TryCatch(async (req, res, _) => {
-  if (!req.user._id) {
+  const user = req.user as unknown as IUser;
+  if (!user._id) {
     throw new ApiError(badRequestErrorClient, "User Id not found");
   }
 
-  const user = await UserModel.findByIdAndUpdate(req.user._id, {
+  const userData = await UserModel.findByIdAndUpdate(user._id, {
     $unset: {
       refreshToken: 1,
     },
   });
 
-  if (!user) {
+  if (!userData) {
     throw new ApiError(badRequestErrorClient, "User not found");
   }
 
@@ -220,6 +221,7 @@ const autoLogin = TryCatch(async (req, res, _) => {
   );
 });
 
+//edit user
 const editUser = TryCatch(async (req, res, _) => {
   const reqUser = req.user as unknown as IUser;
 

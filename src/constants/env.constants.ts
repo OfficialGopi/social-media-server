@@ -21,6 +21,9 @@ const accessTokenExpiry: string = process.env.ACCESS_TOKEN_EXPIRY || "28d";
 const refreshTokenSecret: string = process.env.REFRESH_TOKEN_SECRET || "";
 const refreshTokenExpiry: string = process.env.REFRESH_TOKEN_EXPIRY || "365d";
 
+const googleClientId: string = process.env.GOOGLE_CLIENT_ID || "";
+const googleClientSecret: string = process.env.GOOGLE_CLIENT_SECRET || "";
+
 export {
   port,
   mongoUri,
@@ -35,4 +38,6 @@ export {
   refreshTokenSecret,
   accessTokenExpiry,
   refreshTokenExpiry,
+  googleClientId,
+  googleClientSecret,
 };
