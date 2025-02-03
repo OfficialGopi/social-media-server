@@ -1,6 +1,5 @@
 import {
   badRequestErrorClient,
-  notFoundErrorClient,
   resourceCreatedSuccess,
   unauthorizedErrorClient,
 } from "../constants/statusCode.constant.js";
