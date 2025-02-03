@@ -1,3 +1,4 @@
+const EVENT_USER_ID: string = "USER_ID";
 const EVENT_ALERT: string = "ALERT";
 const EVENT_REFETCH_CHATS: string = "REFETCH_CHATS";
 const EVENT_NEW_ATTACHMENT: string = "NEW_ATTACHMENT";
@@ -6,6 +7,7 @@ const EVENT_NEW_REQUEST: string = "NEW_REQUEST";
 const EVENT_NEW_MESSAGE: string = "NEW_MESSAGE";
 
 export {
+  EVENT_USER_ID,
   EVENT_ALERT,
   EVENT_REFETCH_CHATS,
   EVENT_NEW_ATTACHMENT,

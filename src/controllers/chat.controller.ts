@@ -1,7 +1,10 @@
 import {
   badRequestErrorClient,
+  notFoundErrorClient,
   resourceCreatedSuccess,
+  unauthorizedErrorClient,
 } from "../constants/statusCode.constant.js";
+import { IUser } from "../interfaces/models.js";
 import { ChatModel } from "../models/chat.model.js";
 import { UserModel } from "../models/user.model.js";
 import {
@@ -13,9 +16,21 @@ import { ApiResponse } from "../utils/api.response.js";
 import { TryCatch } from "../utils/custom.try-catch.block.js";
 
 const createPersonalChat = TryCatch(async (req, res) => {
-  const { sender, receiver }: typeCreatePersonalChatRequestBody = req.body;
+  const user = req.user as unknown as IUser;
 
-  if (!sender || !receiver) {
+  if (!user) {
+    throw new ApiError(unauthorizedErrorClient, "User unauthorized");
+  }
+
+  const sender = await UserModel.findById(user._id);
+
+  if (!sender) {
+    throw new ApiError(notFoundErrorClient, "User not found");
+  }
+
+  const { receiver }: typeCreatePersonalChatRequestBody = req.body;
+
+  if (!receiver) {
     throw new ApiError(
       badRequestErrorClient,
       "Sender and receiver are required"
@@ -23,7 +38,7 @@ const createPersonalChat = TryCatch(async (req, res) => {
   }
 
   const users = await UserModel.find({
-    _id: { $in: [sender, receiver] },
+    _id: { $in: [sender._id, receiver] },
   });
 
   if (users.length !== 2) {
@@ -35,7 +50,7 @@ const createPersonalChat = TryCatch(async (req, res) => {
 
   const isChatExist = await ChatModel.findOne({
     isGroup: false,
-    members: { $all: [sender, receiver] },
+    members: { $all: [sender._id, receiver] },
   });
 
   if (isChatExist) {
@@ -44,7 +59,7 @@ const createPersonalChat = TryCatch(async (req, res) => {
 
   const chat = await ChatModel.create({
     isGroup: false,
-    members: [sender, receiver],
+    members: [sender._id, receiver],
   });
 
   res.status(resourceCreatedSuccess).json(
@@ -59,14 +74,31 @@ const createPersonalChat = TryCatch(async (req, res) => {
 });
 
 const createGroupChat = TryCatch(async (req, res) => {
+  const user = req.user as unknown as IUser;
+
+  if (!user) {
+    throw new ApiError(
+      unauthorizedErrorClient,
+      "User is required to create a group chat"
+    );
+  }
+
+  const creator = await UserModel.findById(user._id);
+
+  if (!creator) {
+    throw new ApiError(
+      notFoundErrorClient,
+      "User not found to create a group chat"
+    );
+  }
+
   const {
-    creator,
     members,
     groupName,
     groupDescription = "",
   }: typeCreateGroupChatRequestBody = req.body;
 
-  if (!creator || !members || !groupName) {
+  if (!members || !groupName) {
     throw new ApiError(
       badRequestErrorClient,
       "Creator, members and groupName are required"
@@ -74,16 +106,16 @@ const createGroupChat = TryCatch(async (req, res) => {
   }
 
   const users = await UserModel.find({
-    _id: { $in: [...members, creator] },
+    _id: { $in: [...members] },
   });
 
-  if (users.length !== members.length + 1) {
+  if (users.length !== members.length) {
     throw new ApiError(badRequestErrorClient, "Members are not valid");
   }
 
   const chat = await ChatModel.create({
     isGroup: true,
-    members: [...members, creator],
+    members: [...members, creator._id],
     groupName,
     groupDescription,
     groupAdmin: creator,

@@ -1,6 +1,11 @@
 import { Server, Socket } from "socket.io";
 import { httpServer } from "./app.js";
 import { crossOrigin } from "./constants/env.constants.js";
+import {
+  EVENT_NEW_MESSAGE,
+  EVENT_USER_ID,
+} from "./constants/socketEvents.constants.js";
+import { UserModel } from "./models/user.model.js";
 
 const io = new Server(httpServer, {
   cors: {
@@ -9,14 +14,47 @@ const io = new Server(httpServer, {
   },
 });
 
-io.on("connection", (socket: Socket) => {
-  console.log("User connected : ", socket.id);
+const initializeIo = (io: Server) => {
+  const socketToUserMap = new Map<string, string>();
+  const userToSocketMap = new Map<string, string>();
 
-  // socket.on(newMessage, (data) => {});
+  io.on("connection", async (socket: Socket) => {
+    socket.on(EVENT_USER_ID, async (payload: { userId: string }) => {
+      const { userId } = payload;
+      const user = await UserModel.findById(userId);
+      if (!user) {
+        io.emit(EVENT_USER_ID, {
+          success: false,
+          error: "User not found",
+        });
+      } else {
+        socketToUserMap.set(socket.id, userId);
+        userToSocketMap.set(userId, socket.id);
 
-  socket.on("disconnect", () => {
-    console.log("User disconnected");
+        io.emit(EVENT_USER_ID, {
+          success: true,
+          message: "User connected to socket server",
+        });
+      }
+    });
+
+    socket.on(
+      EVENT_NEW_MESSAGE,
+      async (payload: { message: string; receiver: string }) => {
+        const { message, receiver } = payload;
+        const receiverSocket = userToSocketMap.get(receiver);
+
+        if (!receiverSocket) {
+          console.log("Receiver not active right now");
+        } else {
+        }
+      }
+    );
+
+    socket.on("disconnect", () => {
+      console.log("User disconnected");
+    });
   });
-});
+};
 
-export { io };
+export { io, initializeIo };

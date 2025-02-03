@@ -4,7 +4,6 @@ interface typeCreatePersonalChatRequestBody {
 }
 
 interface typeCreateGroupChatRequestBody {
-  creator: string;
   members: string[];
   groupName: string;
   groupDescription: string;
