@@ -10,16 +10,17 @@ import {
   deleteCommentOnPost,
   replyOnCommentOnPost,
   deleteReplyOnCommentOnPost,
+  getMyPosts,
+  getOthersPosts,
 } from "../controllers/post.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
 const post = Router();
 
-post
-  .route("/:post")
-  .post(upload.array("attachments", 10), verifyJWT, createPost)
-  .put(verifyJWT, editPost)
-  .delete(verifyJWT, deletePost);
+post.route("/").get(verifyJWT, getMyPosts);
+post.route("/:userId").get(verifyJWT, getOthersPosts);
+post.route("/").post(upload.array("attachments", 10), verifyJWT, createPost);
+post.route("/:post").put(verifyJWT, editPost).delete(verifyJWT, deletePost);
 
 post.route("/like/:post").patch(verifyJWT, toogleLikePost);
 

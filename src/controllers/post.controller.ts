@@ -1,11 +1,16 @@
 import {
+  badRequestErrorClient,
+  notFoundErrorClient,
+  okSuccess,
   resourceCreatedSuccess,
   unauthorizedErrorClient,
 } from "../constants/statusCode.constant.js";
 import { IUser } from "../interfaces/models.js";
 import { CommentsOnPostsModel } from "../models/commentsOnPosts.model.js";
+import { FollowersModel } from "../models/followers.model.js";
 import { LikesOnPostsModel } from "../models/likesOnPosts.model.js";
 import { PostsModel } from "../models/posts.model.js";
+import { UserModel } from "../models/user.model.js";
 import { ApiError } from "../utils/api.error.js";
 import { ApiResponse } from "../utils/api.response.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.utils.js";
@@ -432,6 +437,65 @@ const deleteReplyOnCommentOnPost = TryCatch(async (req, res, _) => {
     );
 });
 
+const getMyPosts = TryCatch(async (req, res, next) => {
+  const user = req.user as unknown as IUser;
+
+  if (!user) {
+    throw new ApiError(unauthorizedErrorClient, "User not found");
+  }
+
+  const posts = await PostsModel.find({ user: user._id });
+
+  res
+    .status(okSuccess)
+    .json(new ApiResponse(okSuccess, posts, "Posts retrieved successfully"));
+});
+
+const getOthersPosts = TryCatch(async (req, res, next) => {
+  const user = req.user as unknown as IUser;
+
+  if (!user) {
+    throw new ApiError(unauthorizedErrorClient, "User not found");
+  }
+
+  const {
+    userId,
+  }: {
+    userId?: string;
+  } = req.params;
+
+  if (!userId) {
+    throw new ApiError(
+      badRequestErrorClient,
+      "User ID is required to retrieve posts"
+    );
+  }
+
+  const other = await UserModel.findById(userId);
+
+  if (!other) {
+    throw new ApiError(notFoundErrorClient, "User not found");
+  }
+
+  const isFollowedByUser = await FollowersModel.findOne({
+    follower: user._id,
+    following: other._id,
+  });
+
+  if (other.isPrivate && !isFollowedByUser) {
+    throw new ApiError(
+      badRequestErrorClient,
+      "You are not allowed to view this user"
+    );
+  }
+
+  const posts = await PostsModel.find({ user: userId });
+
+  res
+    .status(200)
+    .json(new ApiResponse(okSuccess, posts, "Posts retrieved successfully"));
+});
+
 export {
   createPost,
   deletePost,
@@ -442,4 +506,6 @@ export {
   replyOnCommentOnPost,
   deleteCommentOnPost,
   deleteReplyOnCommentOnPost,
+  getMyPosts,
+  getOthersPosts,
 };
