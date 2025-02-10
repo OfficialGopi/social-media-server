@@ -16,6 +16,7 @@ import { ApiResponse } from "../utils/api.response.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.utils.js";
 import { TryCatch } from "../utils/custom.try-catch.block.js";
 
+//createPost
 const createPost = TryCatch(async (req, res, _) => {
   const user = req.user as unknown as IUser;
 
@@ -60,6 +61,7 @@ const createPost = TryCatch(async (req, res, _) => {
     );
 });
 
+//editPost
 const editPost = TryCatch(async (req, res, _) => {
   const user = req.user as unknown as IUser;
   const {
@@ -102,6 +104,7 @@ const editPost = TryCatch(async (req, res, _) => {
     );
 });
 
+//deletePost
 const deletePost = TryCatch(async (req, res, _) => {
   const user = req.user as unknown as IUser;
   const {
@@ -148,7 +151,8 @@ const deletePost = TryCatch(async (req, res, _) => {
     );
 });
 
-const toogleLikePost = TryCatch(async (req, res, _) => {
+// like post
+const likePost = TryCatch(async (req, res, _) => {
   const user = req.user as unknown as IUser;
 
   if (!user) {
@@ -192,6 +196,52 @@ const toogleLikePost = TryCatch(async (req, res, _) => {
     );
 });
 
+// unlike post
+const unlikePost = TryCatch(async (req, res, _) => {
+  const user = req.user as unknown as IUser;
+
+  if (!user) {
+    throw new ApiError(unauthorizedErrorClient, "User not found");
+  }
+
+  const {
+    post,
+  }: {
+    post?: string;
+  } = req.params;
+
+  const postFound = await PostsModel.findById(post);
+
+  if (!postFound) {
+    throw new ApiError(unauthorizedErrorClient, "Post not found");
+  }
+
+  const isLiked = await LikesOnPostsModel.findOne({
+    post: postFound._id,
+    user: user._id,
+  });
+
+  if (isLiked) {
+    await isLiked.deleteOne();
+  } else {
+    await LikesOnPostsModel.create({
+      post: postFound._id,
+      user: user._id,
+    });
+  }
+
+  res
+    .status(resourceCreatedSuccess)
+    .json(
+      new ApiResponse(
+        resourceCreatedSuccess,
+        {},
+        "Post liked or removed like successfully"
+      )
+    );
+});
+
+//share post
 const sharePost = TryCatch(async (req, res, _) => {
   const user = req.user as unknown as IUser;
 
@@ -222,6 +272,7 @@ const sharePost = TryCatch(async (req, res, _) => {
     );
 });
 
+//comment on post
 const commentOnPost = TryCatch(async (req, res, _) => {
   const user = req.user as unknown as IUser;
 
@@ -264,6 +315,7 @@ const commentOnPost = TryCatch(async (req, res, _) => {
     );
 });
 
+//reply on comment on post
 const replyOnCommentOnPost = TryCatch(async (req, res, _) => {
   const user = req.user as unknown as IUser;
 
@@ -324,6 +376,7 @@ const replyOnCommentOnPost = TryCatch(async (req, res, _) => {
     );
 });
 
+//delete comment on post
 const deleteCommentOnPost = TryCatch(async (req, res, _) => {
   const user = req.user as unknown as IUser;
 
@@ -387,6 +440,7 @@ const deleteCommentOnPost = TryCatch(async (req, res, _) => {
     );
 });
 
+//delete reply on comment on post
 const deleteReplyOnCommentOnPost = TryCatch(async (req, res, _) => {
   const user = req.user as unknown as IUser;
 
@@ -437,6 +491,7 @@ const deleteReplyOnCommentOnPost = TryCatch(async (req, res, _) => {
     );
 });
 
+//get my posts
 const getMyPosts = TryCatch(async (req, res, next) => {
   const user = req.user as unknown as IUser;
 
@@ -451,6 +506,7 @@ const getMyPosts = TryCatch(async (req, res, next) => {
     .json(new ApiResponse(okSuccess, posts, "Posts retrieved successfully"));
 });
 
+//get others posts
 const getOthersPosts = TryCatch(async (req, res, next) => {
   const user = req.user as unknown as IUser;
 
@@ -500,7 +556,8 @@ export {
   createPost,
   deletePost,
   editPost,
-  toogleLikePost,
+  likePost,
+  unlikePost,
   sharePost,
   commentOnPost,
   replyOnCommentOnPost,

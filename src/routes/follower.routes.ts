@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-import { followOrUnfollow } from "../controllers/follower.controller.js";
+import { follow, unfollow } from "../controllers/follower.controller.js";
 
-const follow = Router();
+const follower = Router();
 
-follow.route("/follow-or-unfollow").post(verifyJWT, followOrUnfollow);
+follower.route("/follow/:following").post(verifyJWT, follow);
+follower.route("/unfollow/:following").post(verifyJWT, unfollow);
 
-export { follow };
+export { follower };
