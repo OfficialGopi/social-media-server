@@ -318,6 +318,7 @@ const editUser = TryCatch(async (req, res, _) => {
   );
 });
 
+//get user data
 const getUserData = TryCatch(async (req, res) => {
   const { username }: { username?: string } = req.params;
 
