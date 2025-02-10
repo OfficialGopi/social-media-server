@@ -43,7 +43,6 @@ const initializeIo = (io: Server) => () => {
           success: false,
           error: "User not found",
         });
-        console.log("no");
       }
     });
 
@@ -60,8 +59,8 @@ const initializeIo = (io: Server) => () => {
       }
     );
 
-    socket.on("disconnect", (e, d) => {
-      console.log(e);
+    socket.on("disconnect", (ev, description) => {
+      console.log(ev);
     });
   });
 };
