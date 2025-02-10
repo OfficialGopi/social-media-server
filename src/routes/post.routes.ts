@@ -6,7 +6,8 @@ import {
   deletePost,
   editPost,
   sharePost,
-  toogleLikePost,
+  likePost,
+  unlikePost,
   deleteCommentOnPost,
   replyOnCommentOnPost,
   deleteReplyOnCommentOnPost,
@@ -18,11 +19,12 @@ import { upload } from "../middlewares/multer.middleware.js";
 const post = Router();
 
 post.route("/").get(verifyJWT, getMyPosts);
-post.route("/:userId").get(verifyJWT, getOthersPosts);
 post.route("/").post(upload.array("attachments", 10), verifyJWT, createPost);
+post.route("/:userId").get(verifyJWT, getOthersPosts);
 post.route("/:post").put(verifyJWT, editPost).delete(verifyJWT, deletePost);
 
-post.route("/like/:post").patch(verifyJWT, toogleLikePost);
+post.route("/like/:post").patch(verifyJWT, likePost);
+post.route("/unlike/:post").patch(verifyJWT, unlikePost);
 
 post
   .route("/comment/:post")

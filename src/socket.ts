@@ -14,27 +14,36 @@ const io = new Server(httpServer, {
   },
 });
 
-const initializeIo = (io: Server) => {
+const initializeIo = (io: Server) => () => {
   const socketToUserMap = new Map<string, string>();
   const userToSocketMap = new Map<string, string>();
 
   io.on("connection", async (socket: Socket) => {
     socket.on(EVENT_USER_ID, async (payload: { userId: string }) => {
       const { userId } = payload;
-      const user = await UserModel.findById(userId);
-      if (!user) {
+      try {
+        const user = await UserModel.findById(userId);
+
+        if (!user) {
+          io.emit(EVENT_USER_ID, {
+            success: false,
+            error: "User not found",
+          });
+        } else {
+          socketToUserMap.set(socket.id, userId);
+          userToSocketMap.set(userId, socket.id);
+
+          io.emit(EVENT_USER_ID, {
+            success: true,
+            message: "User connected to socket server",
+          });
+        }
+      } catch (error) {
         io.emit(EVENT_USER_ID, {
           success: false,
           error: "User not found",
         });
-      } else {
-        socketToUserMap.set(socket.id, userId);
-        userToSocketMap.set(userId, socket.id);
-
-        io.emit(EVENT_USER_ID, {
-          success: true,
-          message: "User connected to socket server",
-        });
+        console.log("no");
       }
     });
 
@@ -51,10 +60,12 @@ const initializeIo = (io: Server) => {
       }
     );
 
-    socket.on("disconnect", () => {
-      console.log("User disconnected");
+    socket.on("disconnect", (e, d) => {
+      console.log(e);
     });
   });
 };
 
-export { io, initializeIo };
+const socketIo = initializeIo(io);
+
+export { socketIo };
