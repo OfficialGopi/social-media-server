@@ -1,6 +1,7 @@
 import {
   badRequestErrorClient,
   notFoundErrorClient,
+  okSuccess,
   resourceCreatedSuccess,
   unauthorizedErrorClient,
 } from "../constants/statusCode.constant.js";
@@ -132,4 +133,27 @@ const createGroupChat = TryCatch(async (req, res) => {
   );
 });
 
-export { createPersonalChat, createGroupChat };
+const getChats = TryCatch(async (req, res) => {
+  const user = req.user as unknown as IUser;
+
+  if (!user) {
+    throw new ApiError(
+      unauthorizedErrorClient,
+      "You are not logged in. Please login to continue"
+    );
+  }
+
+  const chats = await ChatModel.find({
+    members: {
+      $elemMatch: {
+        $eq: user._id,
+      },
+    },
+  });
+
+  res
+    .status(okSuccess)
+    .json(new ApiResponse(okSuccess, chats, "Chats retrieved successfully"));
+});
+
+export { createPersonalChat, createGroupChat, getChats };

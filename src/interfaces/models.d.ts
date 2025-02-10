@@ -13,6 +13,7 @@ interface IUser extends Document {
   gender: "MALE" | "FEMALE" | "OTHERS";
   websites: string[];
   isPrivate: boolean;
+  profilePic: string;
 
   refreshToken: String;
 
@@ -20,8 +21,8 @@ interface IUser extends Document {
   generateAccessToken: () => string;
   generateRefreshToken: () => string;
 
-  createdOn: Date;
-  updatedOn: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface IPreviousCredentialsOfUsers extends Document {
@@ -30,8 +31,8 @@ interface IPreviousCredentialsOfUsers extends Document {
   previousThreeUsernames: [string, string, string];
   previousThreePasswords: [string, string, string];
 
-  createdOn: Date;
-  updatedOn: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface IPosts extends Document {
@@ -42,8 +43,8 @@ interface IPosts extends Document {
   isReel: boolean;
   shareCount: number;
 
-  createdOn: Date;
-  updatedOn: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface ILikesOnPosts extends Document {
@@ -51,8 +52,8 @@ interface ILikesOnPosts extends Document {
   user: Types.ObjectId;
   post: Types.ObjectId;
 
-  createdOn: Date;
-  updatedOn: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface ICommentsOnPosts extends Document {
@@ -63,8 +64,8 @@ interface ICommentsOnPosts extends Document {
   isReply: boolean;
   replyOnCommentId: Types.ObjectId;
 
-  createdOn: Date;
-  updatedOn: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface IFollowers extends Document {
@@ -72,8 +73,8 @@ interface IFollowers extends Document {
   follower: Types.ObjectId;
   following: Types.ObjectId;
 
-  createdOn: Date;
-  updatedOn: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface ISearchHistory extends Document {
@@ -81,8 +82,8 @@ interface ISearchHistory extends Document {
   user: Types.ObjectId;
   searchHistory: string[];
 
-  createdOn: Date;
-  updatedOn: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface IInbox extends Document {}
@@ -96,8 +97,8 @@ interface IChat extends Document {
   members: Types.ObjectId[];
   avatar: string;
 
-  createdOn: Date;
-  updatedOn: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface IChatMessages extends Document {
@@ -107,9 +108,10 @@ interface IChatMessages extends Document {
   message: string;
   attachments: string[];
   deletedForEveryone: boolean;
+  deletedForWhom: Types.ObjectId[];
 
-  createdOn: Date;
-  updatedOn: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface ICallDetails extends Document {
@@ -118,8 +120,8 @@ interface ICallDetails extends Document {
   calling: Types.ObjectId;
   receiving: Types.ObjectId;
 
-  createdOn: Date;
-  updatedOn: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface ICallHistory extends Document {
@@ -128,8 +130,8 @@ interface ICallHistory extends Document {
   duration: number;
   isVideoCall: boolean;
 
-  createdOn: Date;
-  updatedOn: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export {

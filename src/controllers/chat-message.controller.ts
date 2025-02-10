@@ -1,5 +1,7 @@
 import {
   badRequestErrorClient,
+  notFoundErrorClient,
+  okSuccess,
   resourceCreatedSuccess,
   unauthorizedErrorClient,
 } from "../constants/statusCode.constant.js";
@@ -40,10 +42,6 @@ const sendMessage = TryCatch(async (req, res, _) => {
     throw new ApiError(unauthorizedErrorClient, "Unauthorized");
   }
 
-  if (!chatId) {
-    throw new ApiError(badRequestErrorClient, "Receiver is required");
-  }
-
   const chat = await ChatModel.findById(chatId);
 
   if (!chat) {
@@ -64,7 +62,7 @@ const sendMessage = TryCatch(async (req, res, _) => {
     attachments.push(uploadedFile.url);
   }
 
-  await ChatMessagesModel.create({
+  const createdMessage = await ChatMessagesModel.create({
     chat: chat._id,
     sender: sender._id,
     message,
@@ -75,12 +73,159 @@ const sendMessage = TryCatch(async (req, res, _) => {
     new ApiResponse(
       resourceCreatedSuccess,
       {
-        message: message,
-        attachments: attachments,
+        _id: createdMessage._id,
+        chat: createdMessage.chat,
+        sender: createdMessage.sender,
+        message: createdMessage.message,
+        attachments: createdMessage.attachments,
+        createdAt: createdMessage.createdAt,
       },
       "Message Sent Successfully"
     )
   );
 });
 
-export { sendMessage };
+const deleteMessageForMe = TryCatch(async (req, res) => {
+  const user = req.user as unknown as IUser;
+
+  if (!user) {
+    throw new ApiError(401, "You are not logged in. Please login to continue");
+  }
+
+  const {
+    chatMessageId,
+  }: {
+    chatMessageId?: string;
+  } = req.params;
+
+  if (!chatMessageId) {
+    throw new ApiError(badRequestErrorClient, "Chat Message ID is required");
+  }
+
+  const chatMessage = await ChatMessagesModel.findById(chatMessageId);
+
+  if (!chatMessage) {
+    throw new ApiError(notFoundErrorClient, "Chat Message not found");
+  }
+
+  if (chatMessage.deletedForWhom.includes(user._id)) {
+    throw new ApiError(
+      badRequestErrorClient,
+      "You have already deleted this message"
+    );
+  }
+
+  chatMessage.deletedForWhom.push(user._id);
+
+  await chatMessage.save();
+
+  res
+    .status(okSuccess)
+    .json(new ApiResponse(okSuccess, {}, "Message deleted successfully"));
+});
+
+const deleteMessageForEveryOne = TryCatch(async (req, res) => {
+  const user = req.user as unknown as IUser;
+
+  if (!user) {
+    throw new ApiError(401, "You are not logged in. Please login to continue");
+  }
+
+  const {
+    chatMessageId,
+  }: {
+    chatMessageId?: string;
+  } = req.params;
+
+  if (!chatMessageId) {
+    throw new ApiError(badRequestErrorClient, "Chat Message ID is required");
+  }
+
+  const chatMessage = await ChatMessagesModel.findById(chatMessageId);
+
+  if (!chatMessage) {
+    throw new ApiError(notFoundErrorClient, "Chat Message not found");
+  }
+
+  if (chatMessage.sender !== user._id) {
+    throw new ApiError(
+      badRequestErrorClient,
+      "You are not the sender of this message"
+    );
+  }
+
+  if (chatMessage.deletedForEveryone) {
+    throw new ApiError(
+      badRequestErrorClient,
+      "You have already deleted this message"
+    );
+  }
+
+  chatMessage.deletedForEveryone = true;
+
+  await chatMessage.save();
+
+  res
+    .status(okSuccess)
+    .json(
+      new ApiResponse(
+        okSuccess,
+        {},
+        "Message deleted for everyone successfully"
+      )
+    );
+});
+
+const getMessages = TryCatch(async (req, res) => {
+  const user = req.user as IUser;
+
+  if (!user) {
+    throw new ApiError(unauthorizedErrorClient, "Unauthorized");
+  }
+
+  const {
+    chatId,
+  }: {
+    chatId?: string;
+  } = req.params;
+
+  if (!chatId) {
+    throw new ApiError(badRequestErrorClient, "Chat ID is required");
+  }
+
+  const {
+    page = 0,
+  }: {
+    page?: number;
+  } = req.body;
+
+  if (!page) {
+    throw new ApiError(badRequestErrorClient, "Page number is required");
+  }
+
+  const messages = await ChatMessagesModel.find({
+    chat: chatId,
+    deletedForEveryone: false,
+    deletedForWhom: {
+      $elemMatch: {
+        $ne: user._id,
+      },
+    },
+  })
+    .skip(20 * page)
+    .limit(20)
+    .lean();
+
+  res
+    .status(okSuccess)
+    .json(
+      new ApiResponse(okSuccess, messages, "Messages retrieved successfully")
+    );
+});
+
+export {
+  sendMessage,
+  deleteMessageForMe,
+  deleteMessageForEveryOne,
+  getMessages,
+};

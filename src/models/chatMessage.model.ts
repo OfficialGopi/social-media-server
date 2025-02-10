@@ -24,6 +24,11 @@ const chatMessagesSchema = new Schema<IChatMessages>(
       type: Boolean,
       default: false,
     },
+    deletedForWhom: {
+      type: [Schema.ObjectId],
+      default: [],
+      ref: "users",
+    },
   },
   {
     timestamps: true,

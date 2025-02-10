@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   autoLogin,
   editUser,
+  getUserData,
   loginUser,
   logoutUser,
   refreshAccessToken,
@@ -17,5 +18,6 @@ user.route("/auto-login").post(verifyJWT, autoLogin);
 user.route("/refresh-token").post(refreshAccessToken);
 user.route("/edit-user").put(verifyJWT, editUser);
 user.route("/logout").delete(verifyJWT, logoutUser);
+user.route("/get-user-data/:username").post(verifyJWT, getUserData);
 
 export { user };
