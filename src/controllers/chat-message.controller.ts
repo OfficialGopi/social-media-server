@@ -223,9 +223,38 @@ const getMessages = TryCatch(async (req, res) => {
     );
 });
 
+const refetchMessages = TryCatch(async (req, res) => {
+  const user = req.user as IUser;
+
+  const {
+    chatId,
+  }: {
+    chatId?: string;
+  } = req.body;
+
+  if (!chatId) {
+    throw new ApiError(badRequestErrorClient, "Chat ID is required");
+  }
+
+  const newMessage = await ChatMessagesModel.findOne({
+    chat: chatId,
+  }).lean();
+
+  res
+    .status(okSuccess)
+    .json(
+      new ApiResponse(
+        okSuccess,
+        newMessage,
+        "New message retrieved successfully"
+      )
+    );
+});
+
 export {
   sendMessage,
   deleteMessageForMe,
   deleteMessageForEveryOne,
   getMessages,
+  refetchMessages,
 };
