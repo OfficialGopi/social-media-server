@@ -14,6 +14,7 @@ import { ApiResponse } from "../utils/api.response.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.utils.js";
 import { TryCatch } from "../utils/custom.try-catch.block.js";
 
+//send message
 const sendMessage = TryCatch(async (req, res, _) => {
   const user = req.user as unknown as IUser;
 
@@ -85,6 +86,7 @@ const sendMessage = TryCatch(async (req, res, _) => {
   );
 });
 
+//delete message for me
 const deleteMessageForMe = TryCatch(async (req, res) => {
   const user = req.user as unknown as IUser;
 
@@ -124,6 +126,7 @@ const deleteMessageForMe = TryCatch(async (req, res) => {
     .json(new ApiResponse(okSuccess, {}, "Message deleted successfully"));
 });
 
+// delete message for everyone
 const deleteMessageForEveryOne = TryCatch(async (req, res) => {
   const user = req.user as unknown as IUser;
 
@@ -176,6 +179,7 @@ const deleteMessageForEveryOne = TryCatch(async (req, res) => {
     );
 });
 
+//get messages
 const getMessages = TryCatch(async (req, res) => {
   const user = req.user as IUser;
 
@@ -223,6 +227,7 @@ const getMessages = TryCatch(async (req, res) => {
     );
 });
 
+//refetch messages
 const refetchMessages = TryCatch(async (req, res) => {
   const user = req.user as IUser;
 
@@ -230,7 +235,7 @@ const refetchMessages = TryCatch(async (req, res) => {
     chatId,
   }: {
     chatId?: string;
-  } = req.body;
+  } = req.params;
 
   if (!chatId) {
     throw new ApiError(badRequestErrorClient, "Chat ID is required");

@@ -16,6 +16,7 @@ import { ApiError } from "../utils/api.error.js";
 import { ApiResponse } from "../utils/api.response.js";
 import { TryCatch } from "../utils/custom.try-catch.block.js";
 
+//create personal chats
 const createPersonalChat = TryCatch(async (req, res) => {
   const user = req.user as unknown as IUser;
 
@@ -74,6 +75,7 @@ const createPersonalChat = TryCatch(async (req, res) => {
   );
 });
 
+//create group chats
 const createGroupChat = TryCatch(async (req, res) => {
   const user = req.user as unknown as IUser;
 
@@ -133,6 +135,7 @@ const createGroupChat = TryCatch(async (req, res) => {
   );
 });
 
+//get chats
 const getChats = TryCatch(async (req, res) => {
   const user = req.user as unknown as IUser;
 
