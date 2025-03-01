@@ -334,25 +334,9 @@ const getUserData = TryCatch(async (req, res) => {
     throw new ApiError(notFoundErrorClient, "user not found");
   }
 
-  const followings = await FollowersModel.find({
-    follower: user._id,
-  });
-
-  const followers = await FollowersModel.find({
-    following: user._id,
-  });
-
-  res.status(200).json(
-    new ApiResponse(
-      okSuccess,
-      {
-        user,
-        followers,
-        followings,
-      },
-      "User Data retreived successfully"
-    )
-  );
+  res
+    .status(200)
+    .json(new ApiResponse(okSuccess, user, "User Data retreived successfully"));
 });
 
 export {

@@ -15,6 +15,15 @@ const app = express();
 
 const httpServer = createServer(app);
 
+const io = new Server(httpServer, {
+  cors: {
+    origin: crossOrigin,
+    credentials: true,
+  },
+});
+
+app.set("io", io);
+
 app.use(
   cors({
     origin: crossOrigin,
@@ -100,9 +109,10 @@ app.use(express.urlencoded({ extended: true }));
 // });
 
 import { v1 } from "./versions/v1.version.js";
+import { Server } from "socket.io";
 
 app.use("/api/v1", v1);
 
 app.use(errorMiddleware);
 
-export { httpServer };
+export { httpServer, io };

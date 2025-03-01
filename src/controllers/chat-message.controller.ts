@@ -1,4 +1,8 @@
 import {
+  EVENT_NEW_MESSAGE,
+  EVENT_NEW_MESSAGE_ALERT,
+} from "../constants/socketEvents.constants.js";
+import {
   badRequestErrorClient,
   notFoundErrorClient,
   okSuccess,
@@ -13,6 +17,7 @@ import { ApiError } from "../utils/api.error.js";
 import { ApiResponse } from "../utils/api.response.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.utils.js";
 import { TryCatch } from "../utils/custom.try-catch.block.js";
+import { emitEvent } from "../socket/emit-event.js";
 
 //send message
 const sendMessage = TryCatch(async (req, res, _) => {
@@ -68,6 +73,10 @@ const sendMessage = TryCatch(async (req, res, _) => {
     sender: sender._id,
     message,
     attachments,
+  });
+
+  emitEvent(req, EVENT_NEW_MESSAGE_ALERT, chat.members, {
+    chatId: chat._id,
   });
 
   res.status(resourceCreatedSuccess).json(
